@@ -1,17 +1,14 @@
-mov ah, 0x0e
+[org 0x7c00]            ; Add offset
 
-mov al, 'H'
-int 0x10
-mov al, 'e'
-int 0x10
-mov al, 'l'
-int 0x10
-mov al, 'l'
-int 0x10
-mov al, 'o'
-int 0x10
+mov bx, BOOT_MSG
+call print_string
 
 jmp $
+
+%include "src/print_function.S"
+
+BOOT_MSG:
+    db 'BOOTING OS', 0
 
 times 510-($-$$) db 0   ; Pad the boot sector with zeroes
 dw 0xaa55               ; Last two bytes tells the BIOS it's a boot sector
