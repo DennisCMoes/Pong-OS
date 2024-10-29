@@ -1,38 +1,24 @@
-; Load extra disk storage
-mov ds, 0x0
-xor ax, ax
-cld
+; Load DH sectors to ES:BX from drive DL
+disk_load:
+    push dx
 
-mov ah, 0x2h                    ; int=13/ah=0x2h -> Read sectors from drive
-mov al, DISK_SECTORS            ; Read 2 sectors
-mov ch, 0x0                     ; Cylinder 0
-mov cl, 0x2                     ; Load in Sector number 2
-mov dh, 0x0                     ; Use head number 0
+    mov ah, 0x02                    ; int=13/ah=0x2h -> Read sectors from drive
+    mov al, dh                      ; Read DH sectors
+    mov ch, 0x00                    ; Cylinder 0
+    mov dh, 0x00                    ; Head 0
+    mov cl, 0x02                    ; Load in Sector number 2
 
-xor bx, bx
+    int 0x13                        ; Fire in the hole!!
+    jc  disk_error                  ; If CF (carry flag) is set, jump to disk_error
 
-mov es, bx
-int 0x13h                       ; Execute
-jc disk_error                   ; If CF (carry flag) is not empty jump to disk_error
+    pop dx                          ; Restore DX from stack
+    cmp dh, al                      ; if AL (sectors read) != DH (sectors expected)
+    jne disk_error 
+    ret
 
-mov bx, ah                      ; Move the return code into BH
-call print_string
+    disk_error:
+        mov bx, DISK_ERROR_MSG      ; Mov string to parameter
+        call print_string           ; Printing disk error message
+        jmp $
 
-mov bx, al                      ; Move the read sectors count into BH
-call print_string
-
-mov bx, [0x7e00h + 32]          ; Print the hello string outside of the bootloader
-call print_string
-
-jmp 7e00h                       ; Jump to the next sector
-
-disk_error:
-    mov bx, DISK_ERROR_MSG      ; Mov string to parameter
-    call print_string           ; Printing disk error message
-
-DISK_ERROR_MSG:
-    db 'Disk read error :(', 0
-
-; Disk read variables
-DISK_SECTORS:
-    db 0x2
+DISK_ERROR_MSG: db 'Disk read error!', 0
