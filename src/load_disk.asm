@@ -4,7 +4,7 @@ xor ax, ax
 cld
 
 mov ah, 0x2h                    ; int=13/ah=0x2h -> Read sectors from drive
-mov al, 0x1                     ; Read 2 sectors
+mov al, DISK_SECTORS            ; Read 2 sectors
 mov ch, 0x0                     ; Cylinder 0
 mov cl, 0x2                     ; Load in Sector number 2
 mov dh, 0x0                     ; Use head number 0
@@ -12,9 +12,14 @@ mov dh, 0x0                     ; Use head number 0
 xor bx, bx
 
 mov es, bx
-mov bx, 7e00h                   ; 512 bytes from origin address
 int 0x13h                       ; Execute
-jc disk_error                   ; If carry flag is set jump to disk_error subroutine
+jc disk_error                   ; If CF (carry flag) is not empty jump to disk_error
+
+mov bx, ah                      ; Move the return code into BH
+call print_string
+
+mov bx, al                      ; Move the read sectors count into BH
+call print_string
 
 mov bx, [0x7e00h + 32]          ; Print the hello string outside of the bootloader
 call print_string
@@ -27,3 +32,7 @@ disk_error:
 
 DISK_ERROR_MSG:
     db 'Disk read error :(', 0
+
+; Disk read variables
+DISK_SECTORS:
+    db 0x2
