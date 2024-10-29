@@ -10,6 +10,7 @@ mov bx, BOOT_MSG
 call print_string
 
 %include "src/print_function.S"
+%include "src/load_disk.asm"
 
 jmp $
 
