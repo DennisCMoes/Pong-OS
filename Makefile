@@ -5,7 +5,7 @@ clean:
 	rm -rf ${BIN_OUTPUT}
 
 bootloader:
-	nasm ${SRC_OUTPUT}/bootloader.S -f bin -o ${BIN_OUTPUT}/bootloader.bin
+	nasm ${SRC_OUTPUT}/bootloader.asm -f bin -o ${BIN_OUTPUT}/bootloader.bin
 
 iso:
 	dd if=/dev/zero of=boot.iso bs=512 count=2880
