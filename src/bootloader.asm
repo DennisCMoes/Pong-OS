@@ -11,7 +11,7 @@ mov dh, 5
 mov dl, [BOOT_DRIVE_ID]
 call disk_load
 
-; call enable_video_mode
+call enable_video_mode
 
 ; Switch to 32 bit protected mode
 call switch_to_pm
@@ -25,8 +25,11 @@ call switch_to_pm
 
 [bits 32]
 begin_pm:
-    mov ebx, MSG_PROT_MODE
-    call print_string_pm
+    ; mov ebx, MSG_PROT_MODE
+    ; call print_string_pm
+    
+    call draw_pixel
+    
     jmp $
 
 BOOT_DRIVE_ID db 0
