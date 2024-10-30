@@ -1,13 +1,14 @@
 [bits 16]
 [org 0x7c00]                ; Add offset
+KERNEL_OFFSET equ 0x1000    ; Memory off in which we will load our kernel
 
 mov [BOOT_DRIVE_ID], dl     ; Store the boot drive ID from dl into BOOT_DRIVE_ID
 
-mov bp, 0x8000              ; Set up stack at 0x8000
+mov bp, 0x9000              ; Set up stack at 0x9000
 mov sp, bp
 
-mov bx, 0x9000              ; Load 5 sectors to 0x0000(ES):0x9000(BX)
-mov dh, 5
+mov bx, KERNEL_OFFSET       ; Load 5 sectors to 0x0000(ES):0x9000(BX)
+mov dh, 15
 mov dl, [BOOT_DRIVE_ID]
 call disk_load
 
@@ -25,11 +26,9 @@ call switch_to_pm
 
 [bits 32]
 begin_pm:
-    ; mov ebx, MSG_PROT_MODE
-    ; call print_string_pm
-    
     call draw_pixel
-    
+    call KERNEL_OFFSET
+
     jmp $
 
 BOOT_DRIVE_ID db 0
