@@ -15,4 +15,4 @@ iso:
 qemu:
 	make bootloader
 	make iso
-	qemu-system-i386 -drive format=raw,file=boot.iso
+	qemu-system-i386 -drive format=raw,file=boot.iso -d int,pcall,cpu_reset
