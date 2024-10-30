@@ -4,7 +4,7 @@ BIN_OUTPUT 		:= bin
 
 # Files
 KERNEL_SRC 		:= ${SRC_OUTPUT}/kernel.c
-KERNEL_ASM 		:= ${SRC_OUTPUT}/kernel_entry.asm
+KERNEL_ASM 		:= ${SRC_OUTPUT}/bootloader/kernel_entry.asm
 LINKER_SCRIPT 	:= ${SRC_OUTPUT}/linker.ld
 
 # Toolchain
@@ -28,10 +28,9 @@ kernel: # 1. Compile kernel C 2. Link kernel 3. Convert to binary
 	mkdir -p ${BIN_OUTPUT}
 	${CC} -m32 -ffreestanding -c ${KERNEL_SRC} -o ${BIN_OUTPUT}/kernel.o
 	${NASM} -f elf32 ${KERNEL_ASM} -o ${BIN_OUTPUT}/entry.o
-
 	${LD} -m elf_i386 -o ${KERNEL_ELF} -wl,-e,_start -Ttext 0x1000 ${BIN_OUTPUT}/entry.o ${BIN_OUTPUT}/kernel.o
-
 	${OBJCOPY} -O binary ${KERNEL_ELF} ${KERNEL_BIN}
+	rm ${BIN_OUTPUT}/{kernel.elf,kernel.o,entry.o}
 
 iso:
 	dd if=/dev/zero of=boot.iso bs=512 count=16

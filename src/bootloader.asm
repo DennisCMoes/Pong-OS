@@ -7,26 +7,25 @@ mov [BOOT_DRIVE_ID], dl     ; Store the boot drive ID from dl into BOOT_DRIVE_ID
 mov bp, 0x9000              ; Set up stack at 0x9000
 mov sp, bp
 
-mov bx, KERNEL_OFFSET       ; Load 5 sectors to 0x0000(ES):0x9000(BX)
-mov dh, 15
+mov bx, KERNEL_OFFSET       ; Load 15 sectors to 0x0000(ES):0x9000(BX)
+mov dh, 0x15                ; (15 * 512b) = 7.680kb + 512b (bootloader)
 mov dl, [BOOT_DRIVE_ID]
 call disk_load
 
-call enable_video_mode
+mov ah, 0x00                ; int=10/ah=0x0 -> BIOS video mode
+mov al, 0x13                ; 
+int 0x10                    ; Fire in the hole
 
 ; Switch to 32 bit protected mode
 call switch_to_pm
 
-%include "src/print_function.asm"
-%include "src/load_disk.asm"
-%include "src/gdt.asm"
-%include "src/protected_mode.asm"
-%include "src/print_pm.asm"
-%include "src/screen.asm"
+%include "src/bootloader/print_function.asm"
+%include "src/bootloader/load_disk.asm"
+%include "src/bootloader/gdt.asm"
+%include "src/bootloader/protected_mode.asm"
 
 [bits 32]
 begin_pm:
-    call draw_pixel
     call KERNEL_OFFSET
 
     jmp $
