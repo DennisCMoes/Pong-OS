@@ -1,35 +1,26 @@
 #include "kernel/test.c"
-
-#define VGA_VIDEO_MEMORY 0xA0000
+#include "kernel/types.c"
+#include "drivers/screen.c"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 200
 
-struct Color
+int main()
 {
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
-};
-
-int main() {
     int yCoor = 10;
     int xCoor = 30;
 
-    unsigned char* vga_memory = (unsigned char*)VGA_VIDEO_MEMORY;
-    
-    vga_memory[test() * test()] = 0xf;
+    set_palette_color(4, 11, 132, 23);
 
-    struct Color color;
+    uint16 *vga_memory = (uint16 *)VGA_VIDEO_MEMORY;
+    write_pixel(test() * test(), 4);
 
-    color.blue = 0xB3;
-    color.green = 0x2E;
-    color.red = 0xFF;
-
-    for (int y = yCoor; y < yCoor + 10; y++) {
-        for (int x = xCoor; x < xCoor + 50; x++) {
-            unsigned int offset = (y * SCREEN_WIDTH) + x;
-            vga_memory[offset] = 4; // 4 is red
+    for (int y = yCoor; y < yCoor + 10; y++)
+    {
+        for (int x = xCoor; x < xCoor + 50; x++)
+        {
+            uint16 offset = (y * SCREEN_WIDTH) + x;
+            write_pixel(offset, 4);
         }
     }
 }
