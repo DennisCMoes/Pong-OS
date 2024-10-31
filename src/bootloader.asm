@@ -8,7 +8,7 @@ mov bp, 0x9000              ; Set up stack at 0x9000
 mov sp, bp
 
 mov bx, KERNEL_OFFSET       ; Load 15 sectors to 0x0000(ES):0x9000(BX)
-mov dh, 0x15                ; (15 * 512b) = 7.680kb + 512b (bootloader)
+mov dh, 15                  ; (15 * 512b) = 7.680kb + 512b (bootloader)
 mov dl, [BOOT_DRIVE_ID]
 call disk_load
 
