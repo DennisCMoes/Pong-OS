@@ -26,7 +26,7 @@ bootloader:
 
 kernel: # 1. Compile kernel C 2. Link kernel 3. Convert to binary
 	mkdir -p ${BIN_OUTPUT}
-	${CC} -m32 -ffreestanding -c ${KERNEL_SRC} -o ${BIN_OUTPUT}/kernel.o
+	${CC} -m32 -ffreestanding -nostdlib -nostdinc -c ${KERNEL_SRC} -o ${BIN_OUTPUT}/kernel.o
 	${NASM} -f elf32 ${KERNEL_ASM} -o ${BIN_OUTPUT}/entry.o
 	${LD} -m elf_i386 -o ${KERNEL_ELF} -wl,-e,_start -Ttext 0x1000 ${BIN_OUTPUT}/entry.o ${BIN_OUTPUT}/kernel.o
 	${OBJCOPY} -O binary ${KERNEL_ELF} ${KERNEL_BIN}
