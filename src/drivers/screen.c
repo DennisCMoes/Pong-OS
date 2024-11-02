@@ -1,9 +1,5 @@
+#include "../system.h"
 #include "ports.c"
-#include "../kernel/types.c"
-
-#define VGA_VIDEO_MEMORY 0xA0000
-#define VGA_COLOUR_REGISTER_PORT 0x3C8
-#define VGA_COLOUR_DATA_PORT 0x3C9
 
 /**
  * @brief Sets a colour in the VGA palette

@@ -1,4 +1,4 @@
-#include "../kernel/types.c"
+#include "../system.h"
 
 /**
  * @brief Reads a byte (8 bits) from the specified I/O port.
