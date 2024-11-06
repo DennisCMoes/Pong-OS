@@ -3,8 +3,8 @@
 int main()
 {
     unsigned short colorIndex = 0;
-    unsigned char *vgaMemory = (unsigned char*)VGA_VIDEO_MEMORY;
-    
+    unsigned char *vgaMemory = (unsigned char *)VGA_VIDEO_MEMORY;
+
     for (unsigned short yCor = 0; yCor < SCREEN_HEIGHT; yCor++)
     {
         for (unsigned short xCor = 0; xCor < SCREEN_WIDTH; xCor++)
@@ -19,4 +19,6 @@ int main()
             colorIndex = 0;
         }
     }
+
+    for (;;);
 }

@@ -1,5 +1,4 @@
-#include "../system.h"
-#include "ports.c"
+#include <stdio.h>
 
 /**
  * @brief Sets a colour in the VGA palette
@@ -12,7 +11,7 @@
  * @param green The green color component (0-255).
  * @param blue The blue color component (0-255).
  */
-void set_palette_color(uint8 index, uint8 red, uint8 green, uint8 blue)
+void set_palette_color(u8 index, u8 red, u8 green, u8 blue)
 {
     port_byte_out(VGA_COLOUR_REGISTER_PORT, index);
     port_byte_out(VGA_COLOUR_DATA_PORT, red / 4);
@@ -31,8 +30,8 @@ void set_palette_color(uint8 index, uint8 red, uint8 green, uint8 blue)
  * @param colourIndex The color index to write to the offset, representing
  *                    the pixel's color in the 256-color palette.
  */
-void write_pixel(uint16 offset, uint8 colourIndex)
+void write_pixel(u16 offset, u8 colourIndex)
 {
-    uint8 *vgaMemory = (uint8 *)VGA_VIDEO_MEMORY;
+    u8 *vgaMemory = (u8 *)VGA_VIDEO_MEMORY;
     vgaMemory[offset] = colourIndex;
 }
