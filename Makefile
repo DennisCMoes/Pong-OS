@@ -20,8 +20,11 @@ KERNEL_SRC 		:= $(SRC_DIR)/kernel.c
 KERNEL_ENTRY	:= $(KERNEL_DIR)/entry/kernel_entry.asm
 LINKER_SCRIPT 	:= ${SRC_DIR}/linker.ld
 
-C_KERNEL_SRCS	:= $(wildcard $(SRC_DIR)/**/*.c)
+C_KERNEL_SRCS	:= $(shell find src -name "*.c")
+ASM_KERNEL_SRC 	:= $(filter-out src/bootloader.asm src/bootloader/%, $(shell find src -name "*.asm"))
+
 C_KERNEL_OBJS	:= $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(C_KERNEL_SRCS:.c=.o))
+ASM_KERNEL_OBJS	:= $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(ASM_KERNEL_SRC:.asm=.o))
 
 # Output Files
 KERNEL_ELF 		:= ${BIN_DIR}/kernel.elf
@@ -34,13 +37,13 @@ all: compile qemu
 compile: clean dirs bootloader kernel iso
 
 clean:
-	rm -rf bin boot.iso
+	rm -rf bin
 
 dirs:
 	mkdir -p ${BIN_DIR}
 
 test:
-	@echo $(C_KERNEL_OBJS)
+	@echo $(C_KERNEL_SRCS)
 
 bootloader: dirs
 	nasm ${SRC_DIR}/bootloader.asm -f bin -o ${BIN_DIR}/bootloader.bin
@@ -49,16 +52,17 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-stdlib: $(C_KERNEL_OBJS)
-	$(CC) $(CFLAGS) -c $(KERNEL_SRC) -o $(KERNEL_OBJ)
-	$(AR) $(ARFLAGS) $(KERNEL_LIB) $(KERNEL_OBJ) $(C_KERNEL_OBJS)
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.asm
+	@mkdir -p $(dir $@)
+	$(NASM) $(NASM_FLAGS) $< -o $@
 
-kernel: dirs
-	${CC} ${CFLAGS} -c $(KERNEL_SRC) -o $(BIN_DIR)/kernel.o
-	${NASM} ${NASM_FLAGS} ${KERNEL_ENTRY} -o $(BIN_DIR)/entry.o
-	${LD} -T ${LINKER_SCRIPT} -m elf_i386 -o ${KERNEL_ELF} ${BIN_DIR}/entry.o ${BIN_DIR}/kernel.o
-	$(OBJCOPY) -O binary $(KERNEL_ELF) $(KERNEL_BIN)
-	rm bin/*.o bin/*.elf
+stdlib: $(ASM_KERNEL_OBJS) $(C_KERNEL_OBJS)
+	$(AR) $(ARFLAGS) $(KERNEL_LIB) $(ASM_KERNEL_OBJS) $(C_KERNEL_OBJS)
+
+kernel: dirs bootloader stdlib
+	$(LD) -T $(LINKER_SCRIPT) -m elf_i386 -o $(KERNEL_ELF) $(KERNEL_LIB)
+	$(OBJCOPY) -I elf32-i386 -O binary $(KERNEL_ELF) $(KERNEL_BIN)
+	find bin -mindepth 1 ! -name 'bootloader.bin' ! -name 'kernel.bin' -exec rm -rf {} +
 
 iso: bootloader kernel
 	dd if=/dev/zero of=boot.iso bs=512 count=55
