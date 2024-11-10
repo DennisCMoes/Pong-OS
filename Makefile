@@ -17,7 +17,6 @@ NASM			:= nasm
 
 # Files
 KERNEL_SRC 		:= $(SRC_DIR)/kernel.c
-KERNEL_ENTRY	:= $(KERNEL_DIR)/entry/kernel_entry.asm
 LINKER_SCRIPT 	:= ${SRC_DIR}/linker.ld
 
 C_KERNEL_SRCS	:= $(shell find src -name "*.c")
@@ -34,18 +33,13 @@ KERNEL_LIB		:= $(BIN_DIR)/kernel.a
 
 all: compile qemu
 
-compile: clean dirs bootloader kernel iso
+compile: clean bootloader kernel iso
 
 clean:
 	rm -rf bin
 
-dirs:
-	mkdir -p ${BIN_DIR}
-
-test:
-	@echo $(C_KERNEL_SRCS)
-
-bootloader: dirs
+bootloader: 
+	@mkdir -p $(BIN_DIR)
 	nasm ${SRC_DIR}/bootloader.asm -f bin -o ${BIN_DIR}/bootloader.bin
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
@@ -59,7 +53,7 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.asm
 stdlib: $(ASM_KERNEL_OBJS) $(C_KERNEL_OBJS)
 	$(AR) $(ARFLAGS) $(KERNEL_LIB) $(ASM_KERNEL_OBJS) $(C_KERNEL_OBJS)
 
-kernel: dirs bootloader stdlib
+kernel: bootloader stdlib
 	$(LD) -T $(LINKER_SCRIPT) -m elf_i386 -o $(KERNEL_ELF) $(KERNEL_LIB)
 	$(OBJCOPY) -I elf32-i386 -O binary $(KERNEL_ELF) $(KERNEL_BIN)
 	find bin -mindepth 1 ! -name 'bootloader.bin' ! -name 'kernel.bin' -exec rm -rf {} +
@@ -70,4 +64,4 @@ iso: bootloader kernel
 	dd if=${BIN_DIR}/kernel.bin of=boot.iso conv=notrunc seek=1 count=54
 
 qemu:
-	qemu-system-i386 -drive format=raw,file=boot.iso -d int,pcall,cpu_reset --no-reboot --no-shutdown
+	qemu-system-i386 -drive format=raw,file=boot.iso -d int,pcall,cpu_reset,guest_errors --no-reboot --no-shutdown -serial stdio

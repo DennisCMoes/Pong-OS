@@ -19,11 +19,14 @@ typedef long dword;             // Dword type, used for 32-bit signed integer da
 #define VGA_COLOUR_REGISTER_PORT 0x3C8      // Port address to set the color palette index
 #define VGA_COLOUR_DATA_PORT     0x3C9      // Port address to set RGB values for the selected color index
 
+#define COM1_PORT 0x3F8
 
 byte port_byte_in(word port);
 void port_byte_out(word port, byte data);
 
 word port_word_in(word port);
 void port_word_out(word port, word data);
+
+int serial_init();
 
 #endif
