@@ -1,28 +1,28 @@
 # Output
 SRC_DIR 		:= src
 BIN_DIR			:= bin
-KERNEL_DIR		:= $(SRC_DIR)/kernel
+KERNEL_DIR	:= $(SRC_DIR)/kernel
 
 # Flags
 CFLAGS			:= -m32 -ffreestanding -nostdlib -nostdinc -Wall -I src/kernel -msoft-float
 ARFLAGS			:= rcs
-NASM_FLAGS		:= -f elf32
+NASM_FLAGS	:= -f elf32
 
 # Toolchain
 CC				:= i686-elf-gcc
 LD				:= i686-elf-ld
-OBJCOPY			:= i686-elf-objcopy
+OBJCOPY		:= i686-elf-objcopy
 AR				:= i686-elf-ar
 NASM			:= nasm
 
 # Files
-KERNEL_SRC 		:= $(SRC_DIR)/kernel.c
+KERNEL_SRC 			:= $(SRC_DIR)/kernel.c
 LINKER_SCRIPT 	:= ${SRC_DIR}/linker.ld
 
-C_KERNEL_SRCS	:= $(shell find src -name "*.c")
+C_KERNEL_SRCS		:= $(shell find src/kernel -name "*.c") $(shell find src -path src/kernel -prune -o -name "*.c" -print) 
 ASM_KERNEL_SRC 	:= $(filter-out src/bootloader.asm src/bootloader/%, $(shell find src -name "*.asm"))
 
-C_KERNEL_OBJS	:= $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(C_KERNEL_SRCS:.c=.o))
+C_KERNEL_OBJS		:= $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(C_KERNEL_SRCS:.c=.o))
 ASM_KERNEL_OBJS	:= $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(ASM_KERNEL_SRC:.asm=.o))
 
 # Output Files
@@ -37,6 +37,9 @@ compile: clean bootloader kernel iso
 
 clean:
 	rm -rf bin
+
+test:
+	echo $(C_KERNEL_SRCS)
 
 bootloader: 
 	@mkdir -p $(BIN_DIR)
@@ -56,7 +59,7 @@ stdlib: $(ASM_KERNEL_OBJS) $(C_KERNEL_OBJS)
 kernel: bootloader stdlib
 	$(LD) -T $(LINKER_SCRIPT) -m elf_i386 -o $(KERNEL_ELF) $(KERNEL_LIB)
 	$(OBJCOPY) -I elf32-i386 -O binary $(KERNEL_ELF) $(KERNEL_BIN)
-	find bin -mindepth 1 ! -name 'bootloader.bin' ! -name 'kernel.bin' -exec rm -rf {} +
+	# find bin -mindepth 1 ! -name 'bootloader.bin' ! -name 'kernel.bin' -exec rm -rf {} +
 
 iso: bootloader kernel
 	dd if=/dev/zero of=boot.iso bs=512 count=55
