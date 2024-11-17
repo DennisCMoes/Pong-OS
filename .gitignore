@@ -3,3 +3,4 @@ bin/*
 
 .DS_store
 boot.iso
+serial.log
