@@ -1,74 +1,30 @@
-#include <system.h>
-#include <stdio.h>
+#include "kernel/system.h"
+#include "kernel/stdio.h"
 
 int main()
 {
-    char msg[] = "Hello from the debug menu!\n";
-
     serial_init();
-    write_serial_string(msg);
-    write_serial_string("This is my second line\n");
+    char msg[] = "hello from the debug menu!\n";
+    // write_serial_string(msg);
 
-    //write_serial('D');
-    //write_serial('E');
-    //write_serial('N');
-    //write_serial('N');
-    //write_serial('I');
-    //write_serial('S');
+    void *args[] = {
+      (void *)"Hello, OS!",
+      (void *)(long)1234,
+      (void *)(long)0xABCD,
+      (void *)(long)'A',
+      (void *)"Test string",
+    };
 
-    unsigned short colorIndex = 0;
-    unsigned char *vgaMemory = (unsigned char *)VGA_VIDEO_MEMORY;
+    serial_printf("%s\n", args);
+    serial_printf("Value: %d\n", args+1);
+    serial_printf("Hex: %x\n", args+2);
+    serial_printf("Char: %c\n", args+3);
+    serial_printf("String: %s\n", args+4);
 
-    // unsigned short yCor = 0;
-    // unsigned short xCor = 0;
-
-    // while (yCor < SCREEN_HEIGHT)
-    // {
-    //     while (xCor < SCREEN_WIDTH)
-    //     {
-    //         unsigned short offset = (yCor * SCREEN_WIDTH) + xCor;
-    //         vgaMemory[offset] = colorIndex;
-    //         xCor++;
-    //     }
-
-    //     xCor = 0;
-    //     colorIndex++;
-    //     if (colorIndex == 257)
-    //     {
-    //         colorIndex = 0;
-    //     }
-
-    //     yCor++;
-    //     if (yCor >= SCREEN_HEIGHT)
-    //     {
-    //         yCor = 0;
-    //     }
-    // }
-
-    for (unsigned short yCor = 0; yCor < SCREEN_HEIGHT; yCor++)
-    {
-        for (unsigned short xCor = 0; xCor < SCREEN_WIDTH; xCor++)
-        {
-            unsigned short offset = (yCor * SCREEN_WIDTH) + xCor;
-            vgaMemory[offset] = colorIndex;
-        }
-
-        colorIndex++;
-        if (colorIndex == 257)
-        {
-            colorIndex = 0;
-        }
-    }
-
-    for (unsigned short yCor = 60; yCor < 70; yCor++)
-    {
-        for (unsigned short xCor = 100; xCor < 200; xCor++)
-        {
-            unsigned short offset = (yCor * SCREEN_WIDTH) + xCor;
-            vgaMemory[offset] = 4;
-        }
-    }
-
-    for (;;)
-        ;
+    // draw_pixel(100, 300, 2);
+    // draw_char('d', 80, 80);
+    // u8 *vgamemory = (u8*)vga_video_memory;
+    // vgamemory[2000] = 2;
+    
+    while (1);
 }
