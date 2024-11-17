@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include "stdio.h"
+#include "system.h"
 
 /**
  * @brief Sets a colour in the VGA palette
@@ -30,9 +31,10 @@ void set_palette_color(u8 index, u8 red, u8 green, u8 blue)
  * @param colourIndex The color index to write to the offset, representing
  *                    the pixel's color in the 256-color palette.
  */
-void write_pixel(u16 offset, u8 colourIndex)
+void draw_pixel(u16 xCor, u16 yCor, u8 colourIndex)
 {
-    u8 *vgaMemory = (u8 *)VGA_VIDEO_MEMORY;
+    u16 offset = (yCor * SCREEN_WIDTH) + SCREEN_HEIGHT;
+    u16 *vgaMemory = (u16 *)VGA_VIDEO_MEMORY;
     vgaMemory[offset] = colourIndex;
 }
 
