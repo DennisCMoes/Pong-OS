@@ -1,4 +1,5 @@
 #include "idt.h"
+#include "../isr/isr.h"
 
 __attribute__((aligned(0x10)))
 idt_entry_t idt[IDT_ENTRIES];
@@ -14,6 +15,9 @@ void idt_init() {
     idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
     vectors[vector] = 1;
   }
+
+  // divide by zero exception
+  idt_set_descriptor(0, divide_by_zero_exception, 0x8E);
 
   __asm__ volatile ("lidt %0" : : "m"(idtr)); // Load the new IDT
   __asm__ volatile ("sti"); // Set the interrupt flag
