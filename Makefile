@@ -4,7 +4,7 @@ BIN_DIR			:= bin
 KERNEL_DIR	:= $(SRC_DIR)/kernel
 
 # Flags
-CFLAGS			:= -m32 -ffreestanding -nostdlib -nostdinc -Wall -I src/kernel -msoft-float
+CFLAGS			:= -m32 -ffreestanding -nostdlib -nostdinc -Wall -msoft-float
 ARFLAGS			:= rcs
 NASM_FLAGS	:= -f elf32
 
