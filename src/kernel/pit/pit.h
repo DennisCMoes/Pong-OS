@@ -9,8 +9,6 @@
 // #define PIC1_COMMAND    0xA0
 #define PIT_FREQUENCY   1193182
 
-extern volatile u32 tick;
-
 /**
  * 
  * Bits         Usage
