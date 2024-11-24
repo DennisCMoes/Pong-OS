@@ -19,6 +19,10 @@ void idt_init() {
   // divide by zero exception
   idt_set_descriptor(0, divide_by_zero_exception, 0x8E);
 
+  extern void pit_isr();
+  // PIT isr (IRQ0)
+  idt_set_descriptor(0x20, pit_isr, 0x8E);
+
   __asm__ volatile ("lidt %0" : : "m"(idtr)); // Load the new IDT
   __asm__ volatile ("sti"); // Set the interrupt flag
 }
