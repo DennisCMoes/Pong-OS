@@ -26,15 +26,15 @@ void set_palette_color(u8 index, u8 red, u8 green, u8 blue)
  * This function sets the color of a pixel in VGA mode by writing
  * a color index to the given offset in video memory.
  *
- * @param offset The offset in video memory where the pixel will be written.
- *               This offset corresponds to the position on the screen.
+ * @param xCor The x coordinates of the pixel.
+ * @param yCor The y coordinates of the pixel.
  * @param colourIndex The color index to write to the offset, representing
  *                    the pixel's color in the 256-color palette.
  */
 void draw_pixel(u16 xCor, u16 yCor, u8 colourIndex)
 {
-    u16 offset = (yCor * SCREEN_WIDTH) + SCREEN_HEIGHT;
-    u16 *vgaMemory = (u16 *)VGA_VIDEO_MEMORY;
+    u8 *vgaMemory = (u8 *)VGA_VIDEO_MEMORY;
+    u16 offset = (yCor * SCREEN_WIDTH) + xCor;
     vgaMemory[offset] = colourIndex;
 }
 

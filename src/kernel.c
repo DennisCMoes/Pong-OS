@@ -7,12 +7,10 @@
 extern volatile u32 tick;
 
 int main() {
+  serial_init();
   idt_init();
   init_pic();
-  init_pit(5); // 60 fps
-  serial_init();
-
-  __asm__ volatile("sti");
+  init_pit(60); // 60 fps
 
   void *args[] = {
       (void *)"Hello, OS!",
@@ -28,35 +26,25 @@ int main() {
   serial_printf("Char: %c\n", args + 3);
   serial_printf("String: %s\n", args + 4);
 
-  u16 colorIndex = 0;
-  u16 offset = 0;
-  u8 *vga_memory = (u8 *)VGA_VIDEO_MEMORY;
+  u16 colourIndex = 0;
 
   u32 last_tick = tick;
 
   while (1) {
     // Wait for the next tick
-    while (tick - last_tick < 1);
+    while (tick - last_tick < 6);
 
     last_tick = tick;
-
-    // write_serial_string("NEW LINE\n");
-
+    
     for (u16 yCor = 0; yCor < SCREEN_HEIGHT; yCor++) {
       for (u16 xCor = 0; xCor < SCREEN_WIDTH; xCor++) {
-        u16 offset = (yCor * SCREEN_WIDTH) + xCor;
-        vga_memory[offset] = colorIndex + offset;
+        draw_pixel(xCor, yCor, colourIndex);
       }
-
-      colorIndex++;
-      if (colorIndex == 257) {
-        colorIndex = 0;
+    
+      colourIndex++;
+      if (colourIndex == 257) {
+        colourIndex = 0;
       }
-    }
-
-    offset++;
-    if (offset == 257) {
-      offset = 0;
     }
   }
 }
