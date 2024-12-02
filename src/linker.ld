@@ -1,8 +1,28 @@
-OUTPUT_FORMAT("elf32-i386")
-ENTRY(main)
-SECTIONS {
-    . = 0x001000; /* Start address for the kernel */
-    .text : { *(.text) }    /* Place all .text sections here */
-    .data : { *(.data) }    /* Place all .data sections here */
-    .bss  : { *(.bss) }     /* Place all .bss sections here */
+OUTPUT_FORMAT("binary")
+ENTRY(_start)
+SECTIONS
+{
+    . = 0x10000;
+
+    .text BLOCK(4K) : ALIGN(4K)
+    {
+        *(.text)
+    }
+
+    .rodata BLOCK(4K) : ALIGN(4K)
+    {
+        *(.rodata)
+    }
+
+    .data BLOCK(4K) : ALIGN(4K)
+    {
+        *(.data)
+    }
+
+    .bss BLOCK(4K) : ALIGN(4K)
+    {
+        *(.bss)
+    }
+
+    end = .;
 }

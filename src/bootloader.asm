@@ -40,12 +40,76 @@ _start:
     int 0x13
     jc disk_error
 
+    ; Set video mode: 320x200 with 16 bit colors
+    mov ah, 0x00
+    mov al, 0x13
+    int 0x10
         
     ; Enable A20 line and disable interrupts
     cli
 
+    ; Read and save state
+    call enable_a20_wait0
+    mov al, 0xD0
+    out 0x64, al
+    call enable_a20_wait0
+    xor ax, ax
+    in al, 0x60
+
+    ; Write new state with A20 bit set (0x2)
+    push ax
+    call enable_a20_wait0
+    mov al, 0xD1
+    out 0x64, al
+    call enable_a20_wait0
+    pop ax
+    or ax, 0x2
+    out 0x60, al
+
+    ; Enable PE flag
+    mov eax, cr0
+    or eax, 0x1
+    mov cr0, eax
+
+    ; Jump to flush the prefetch queue
+    jmp flush
+
+flush:
+    lidt [idt]
+    lgdt [gdtp]
+
+    mov ax, gdt_data_segment - gdt_start
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    mov esp, 0x3000
+    jmp 0x8:entry32
+
+[bits 32]
+entry32:
+    ; Jump to the kernel, loaded at 0x10000
+    mov eax, 0x10000
+    jmp eax
+
 _loop:
     jmp _loop
+
+[bits 16]
+enable_a20_wait0:
+  xor ax, ax
+  in al, 0x64
+  bt ax, 1
+  jc enable_a20_wait0
+  ret
+
+enable_a20_wait1:
+  xor ax, ax
+  in al, 0x64
+  bt ax, 0
+  jnc enable_a20_wait1
+  ret
 
 ; Prints string at DS:SI
 print:
