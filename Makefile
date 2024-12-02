@@ -7,15 +7,16 @@ CCFLAGS+=-Wno-pointer-arith -Wno-unused-parameter
 CCFLAGS+=-nostdlib -nostdinc -ffreestanding -fno-pie -fno-stack-protector
 CCFLAGS+=-fno-builtin-function -fno-builtin
 
-BOOTSECT_SRCS=src/bootloader.asm
+BOOTSECT_SRCS=src/stage0.asm
 BOOTSECT_OBJS=$(BOOTSECT_SRCS:.asm=.o)
 
-KERNEL_C_SRCS=$(wildcard src/*.c)
-KERNEL_OBJS=$(KERNEL_C_SRCS:.c=.o)
+KERNEL_C_SRCS=	$(wildcard src/*.c)
+KERNEL_ASM_SRCS=$(filter-out $(BOOTSECT_SRCS), $(wildcard src/*.asm))
+KERNEL_OBJS=	$(KERNEL_ASM_SRCS:.asm=.o) $(KERNEL_C_SRCS:.c=.o)
 
-BOOTLOADER=bootloader.bin
-KERNEL=kernel.bin
-ISO=boot.iso
+BOOTLOADER=	bootloader.bin
+KERNEL=		kernel.bin
+ISO=		boot.iso
 
 all: clean
 
@@ -26,6 +27,9 @@ clean:
 
 dirs:
 	mkdir -p bin
+
+%.o: %.asm
+	$(NASM) -f elf32 -o $@ $<
 
 %.o: %.c
 	$(CC) -o $@ -c $< $(CCFLAGS)

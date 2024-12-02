@@ -3,7 +3,7 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGH 200
 
-int _start() {
+int _main() {
     int yCor = 10;
     int xCor = 30;
 
