@@ -40,7 +40,7 @@ bootloader:
 kernel: $(KERNEL_OBJS)
 	$(LD) -o ./bin/$(KERNEL) $^ -Tsrc/linker.ld
 
-iso: bootloader kernel
+iso: clean bootloader kernel
 	dd if=/dev/zero of=boot.iso bs=512 count=2880
 	dd if=./bin/$(BOOTLOADER) of=boot.iso conv=notrunc bs=512 seek=0 count=1
 	dd if=./bin/$(KERNEL) of=boot.iso conv=notrunc bs=512 seek=1 count=2048
