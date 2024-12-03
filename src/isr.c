@@ -1,5 +1,6 @@
 #include "isr.h"
 #include "idt.h"
+#include "io.h"
 
 #define NUM_ISRS 48
 
@@ -156,6 +157,7 @@ void isr_handler(struct Registers *regs) {
 
 static void exception_handler(struct Registers *regs) {
     // Call exception handler with exception -> exception[regs->int_no];
+    write_serial_string(exceptions[regs->int_no]);
 }
 
 void isr_init() {
