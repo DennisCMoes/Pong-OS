@@ -42,7 +42,7 @@ static inline void *memcpy(void *dst, const void *src, size_t n) {
     const u8 *src_ptr = (u8 *)src;
 
     while (n-- > 0) {
-        *dst_ptr = *src_ptr++;
+        *dst_ptr++ = *src_ptr++;
     }
 
     return dst_ptr;
@@ -61,6 +61,16 @@ static inline void *memmove(void *dst, const void *src, size_t n) {
     }
 
     return dst;
+}
+
+static inline u8 port_byte_in(u16 port) {
+    u8 result;
+    asm("in %%dx, %%al" : "=a"(result) : "d"(port));
+    return result;
+}
+
+static inline void port_byte_out(u16 port, u8 data) {
+    asm("out %%al, %%dx" : : "a"(data), "d"(port));
 }
 
 
