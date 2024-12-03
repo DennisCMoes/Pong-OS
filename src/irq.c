@@ -1,5 +1,6 @@
 #include "irq.h"
 #include "isr.h"
+#include "idt.h"
 #include "system.h"
 
 // PIC constants
@@ -46,8 +47,8 @@ static void irq_remap() {
   u8 mask1 = port_byte_in(PIC1_DATA);
   u8 mask2 = port_byte_in(PIC2_DATA);
 
-  port_byte_out(PIC1, ICW1_INIT || ICW1_ICW4);
-  port_byte_out(PIC2, ICW1_INIT || ICW1_ICW4);
+  port_byte_out(PIC1, 0x11);
+  port_byte_out(PIC2, 0x11);
   port_byte_out(PIC1_DATA, PIC1_OFFSET);
   port_byte_out(PIC2_DATA, PIC2_OFFSET);
   port_byte_out(PIC1_DATA, 0x04); // PIC2 at IRQ2

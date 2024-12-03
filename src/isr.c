@@ -158,6 +158,7 @@ void isr_handler(struct Registers *regs) {
 static void exception_handler(struct Registers *regs) {
     // Call exception handler with exception -> exception[regs->int_no];
     write_serial_string(exceptions[regs->int_no]);
+    write_serial_string("\n");
 }
 
 void isr_init() {
