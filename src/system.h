@@ -29,34 +29,34 @@ typedef u8 boolean;
 
 #define PACKED __attribute__((packed))
 
-static inline void memset(void *dst, u8 value, size_t n) {
+static inline void memset(void *dst, u8 value, size_t size) {
     u8 *dst_ptr = (u8 *)dst;
 
-    while (n-- > 0) {
+    while (size-- > 0) {
         *dst_ptr++ = value;
     }
 }
 
-static inline void *memcpy(void *dst, const void *src, size_t n) {
+static inline void *memcpy(void *dst, const void *src, size_t size) {
     u8 *dst_ptr = (u8 *)dst;
     const u8 *src_ptr = (u8 *)src;
 
-    while (n-- > 0) {
+    while (size-- > 0) {
         *dst_ptr++ = *src_ptr++;
     }
 
     return dst_ptr;
 }
 
-static inline void *memmove(void *dst, const void *src, size_t n) {
+static inline void *memmove(void *dst, const void *src, size_t size) {
     if (dst < src) {
-        return memcpy(dst, src, n);
+        return memcpy(dst, src, size);
     }
 
     u8 *dst_ptr = (u8 *)dst;
     const u8 *src_ptr = (u8 *)src;
 
-    for (size_t i = n; i > 0; i++) {
+    for (size_t i = size; i > 0; i++) {
         dst_ptr[i - 1] = src_ptr[i - 1];
     }
 
