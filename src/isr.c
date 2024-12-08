@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "io.h"
 
+// Number of ISRs (32 for exceptions, 16 for IRQs)
 #define NUM_ISRS 48
 
 extern void _isr0(struct Registers*);
@@ -137,37 +138,45 @@ static const char *exceptions[32] = {
     "RESERVED"
 };
 
+// Each ISR entry has an index and a corresponding assembly stub function.
 static struct {
     size_t index;
     void (*stub)(struct Registers*);
 } isrs[NUM_ISRS];
 
+// Array of handler functions, one for each ISR
 static void (*handlers[NUM_ISRS])(struct Registers*) = { 0 };
 
+// Function to assign a custom handler to a specific ISR
 void isr_install(size_t i, void (*handler)(struct Registers *)) {
     handlers[i] = handler;
 }
 
-// Referenced in stage1.asm
+// The main ISR handler called when an interrupt occurs. Referenced in stage1.asm
 void isr_handler(struct Registers *regs) {
     if (handlers[regs->int_no]) {
         handlers[regs->int_no](regs);
     }
 }
 
+// A default handler for CPU exceptions.
 static void exception_handler(struct Registers *regs) {
-    // Call exception handler with exception -> exception[regs->int_no];
-    write_serial_string(exceptions[regs->int_no]);
-    write_serial_string("\n");
+  // Write the exception name to the serial port for debugging
+  write_serial_string("Exception: ");
+  write_serial_string(exceptions[regs->int_no]);
+  write_serial_string("\n");
 }
 
+// Initializes the iSRs and sets up the default handlers.
 void isr_init() {
     for (size_t i = 0; i < NUM_ISRS; i++) {
+        // Associate each ISR number with its assembly stub
         isrs[i].index = i;
         isrs[i].stub = stubs[i];
         idt_set(isrs[i].index, isrs[i].stub, 0x08, 0x8E);
     }
 
+    // Install the default exception handler for the first 32 ISRs
     for (size_t i = 0; i < 32; i++) {
         isr_install(i, exception_handler);
     }

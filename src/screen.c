@@ -18,4 +18,3 @@ void screen_clear(u8 color) {
     memset(&CURRENT, color, SCREEN_SIZE);
 }
 
-void screen_init() {}

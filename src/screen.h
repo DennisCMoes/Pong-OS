@@ -16,6 +16,5 @@ extern u8 screen_back;
 
 void screen_swap();
 void screen_clear(u8 color);
-void screen_init();
 
 #endif
