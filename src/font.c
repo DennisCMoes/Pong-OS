@@ -133,6 +133,24 @@ static const u8 FONT[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}    // U+007F
 };
 
+void font_char_scaled(u8 character, size_t xCor, size_t yCor, u8 colour, u8 scale) {
+  if (character < 0 || character >= 128) return;
+
+  const u8 *glyph = FONT[(u8)character];
+
+  for (size_t row = 0; row < 8; row++) {
+    for (size_t col = 0; col < 8; col++) {
+      if (glyph[row] & (1 << col)) {
+        for (u8 i = 0; i < scale; i++) {
+          for (u8 j = 0; j < scale; j++) {
+            screen_set(xCor + (col * scale) + j, yCor + (row * scale) + i, colour);
+          }
+        }
+      }
+    }
+  }
+}
+
 void font_char(u8 character, size_t xCor, size_t yCor, u8 colour) {
   if (character < 0 || character >= 128) return;
 
