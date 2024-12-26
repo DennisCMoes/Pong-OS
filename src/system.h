@@ -87,5 +87,16 @@ static inline void port_byte_out(u16 port, u8 data) {
     asm("out %%al, %%dx" : : "a"(data), "d"(port));
 }
 
+static inline size_t strlen(const char *str) {
+  size_t length = 0;
+  u8 character;
+  
+  while ((character = *str++) != 0) {
+    length++;
+  }
+
+  return length;
+}
+
 
 #endif
