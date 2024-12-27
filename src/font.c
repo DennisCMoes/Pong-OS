@@ -151,6 +151,14 @@ void font_char_scaled(u8 character, size_t xCor, size_t yCor, u8 colour, u8 scal
   }
 }
 
+void font_str_scaled(const char *str, size_t xCor, size_t yCor, u8 colour, u8 scale) {
+  u8 character;
+
+  while ((character = *str++) != 0) {
+    font_char_scaled(character, xCor, yCor, colour, scale);
+  }
+}
+
 void font_char(u8 character, size_t xCor, size_t yCor, u8 colour) {
   if (character < 0 || character >= 128) return;
 
