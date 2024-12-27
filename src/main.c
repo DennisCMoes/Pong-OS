@@ -3,11 +3,11 @@
 #include "screen.h"
 #include "isr.h"
 #include "idt.h"
-#include "system.h"
 #include "timer.h"
 #include "font.h"
 #include "keyboard.h"
 #include "fpu.h"
+#include "main.h"
 
 #define FPS 120
 
@@ -20,8 +20,6 @@
 #define PRIMARY_COLOUR 15     // White
 #define SECONDARY_COLOUR 23   // Grey ish
                      
-#define TILE_SIZE 5
-
 // Menu states
 #define MENU_START_ONE_PLAYER 0
 #define MENU_START_TWO_PLAYER 1
@@ -35,30 +33,7 @@
 static u16 SCREEN_CENTER_X = SCREEN_WIDTH / 2;
 static u16 SCREEN_CENTER_Y = SCREEN_HEIGHT / 2;
 
-enum PaddleDirection { Up=-1, Down=1 };
-
-typedef struct {
-  u8 player_one_score;
-  u8 player_two_score;
-  u8 game_mode;
-} GameState;
-
-typedef struct {
-  u8 colour;
-  u8 sizeX;
-  u8 sizeY;
-  i16 xCor;
-  i16 yCor;
-} Paddle;
-
-typedef struct {
-  u8 colour;
-  u8 size;
-  i8 velocityX;
-  i8 velocityY;
-  i16 xCor;
-  i16 yCor;
-} Ball;
+static u8 WINNING_SCORE = 1;
 
 GameState game_state;
 Paddle left_paddle, right_paddle;
@@ -80,9 +55,6 @@ Ball ball;
 #define BALL_COLLIDES_WITH_RIGHT_PADDLE_Y(ball, paddle) \
   (((ball).yCor >= ((paddle).yCor)) && ((ball).yCor <= ((paddle).yCor) + ((paddle).sizeY)))
   
-void reset_ball();
-void render();
-
 void init() {
   game_state = (GameState) {
     .game_mode = GAME_MODE_MENU,
@@ -146,8 +118,11 @@ void draw_ball(Ball *ball) {
 }
 
 void draw_score() {
-  font_char('0' + game_state.player_one_score, SCREEN_CENTER_X - 16, 20, PRIMARY_COLOUR);
-  font_char('0' + game_state.player_two_score, SCREEN_CENTER_X + 8, 20, PRIMARY_COLOUR);
+  size_t score_offset_left = 8 * 3 * 2;
+  size_t score_offset_right = 8 * 3;
+
+  font_char_scaled('0' + game_state.player_one_score, SCREEN_CENTER_X - score_offset_left, 20, PRIMARY_COLOUR, 3);
+  font_char_scaled('0' + game_state.player_two_score, SCREEN_CENTER_X + score_offset_right, 20, PRIMARY_COLOUR, 3);
 }
 
 void draw_game_arena() {
@@ -162,18 +137,6 @@ void draw_game_arena() {
     yCor++;
     if (yCor % 10 == 0) {
       yCor += 10;
-    }
-  }
-}
-
-void draw_game_arena_border() {
-  for (size_t yCor = 0; yCor < SCREEN_HEIGHT; yCor++) {
-    for (size_t xCor = 0; xCor < SCREEN_WIDTH; xCor++) {
-      screen_set(xCor, yCor, SECONDARY_COLOUR);
-    }
-
-    if (yCor == 4) {
-      yCor = SCREEN_HEIGHT - 5;
     }
   }
 }
@@ -222,6 +185,26 @@ void on_point_scored() {
   countdown();
 }
 
+void listen_go_back_to_menu(volatile boolean *is_running) {
+  while (*is_running) {
+    u8 key = keyboard_get_key();
+
+    if (key != 0) {
+      write_serial_string("KEY");
+      write_serial_char(key);
+      write_serial_char('\n');
+
+      if (key == 27) {
+        write_serial_string("PRESSED ESCAPE\n");
+        menu_init();
+        game_state.game_mode = GAME_MODE_MENU;
+        *is_running = false;
+        break;
+      }
+    }
+  }
+}
+
 void update_ball() {
   GameState *game_state_ptr = &game_state;
 
@@ -236,15 +219,19 @@ void update_ball() {
   // Calculate offset velocity:
   //  https://gamedev.stackexchange.com/questions/4253/in-pong-how-do-you-calculate-the-balls-direction-when-it-bounces-off-the-paddl 
   if (BALL_HIT_LEFT_WALL(ball)) {
-    game_state_ptr->player_two_score += 1;
+    game_state.player_two_score++;
+
+    render_popup("Player 2 has won\n[esc] - Main menu\n[1] - Retry", listen_go_back_to_menu);
     reset_ball();
-    countdown();
+    // countdown();
   }
 
   if (BALL_HIT_RIGHT_WALL(ball)) {
-    game_state_ptr->player_one_score += 1;
+    game_state.player_one_score++;
+
+    render_popup("Player 1 has won\n[esc] - Main menu\n[1] - Retry", listen_go_back_to_menu);
     reset_ball();
-    countdown();
+    // countdown();
   }
 
   u16 lPaddleY = left_paddle.yCor;
@@ -320,6 +307,80 @@ void keyboard_handler() {
 // =========
 // Rendering
 // =========
+void render_popup(const char *label, void (*listener_func)(volatile boolean *running)) {
+  u8 banner = 6, xPadding = 20, yPadding = 10, line_height = 8, lines = 0;
+
+  u16 max_label_length = 0;
+  u16 label_length = 0;
+
+  for (size_t i = 0; label[i] != '\0'; i++) {
+    label_length++;
+
+    if (label[i] == '\n') {
+      lines++;
+
+      if (label_length > max_label_length) {
+        max_label_length = label_length;
+        label_length = 0;
+      }
+    }
+  }
+
+  u16 popup_height = banner + (yPadding * 2) + (lines * line_height);
+  u16 popup_width = (max_label_length * 8) + (xPadding * 2);
+
+  size_t startX = SCREEN_CENTER_X - (popup_width / 2);
+  size_t startY = SCREEN_CENTER_Y - (popup_height / 2);
+
+  // Draw popup background
+  for (size_t y = startY; y < (startY + popup_height + banner); y++) {
+    for (size_t x = startX; x < (startX + popup_width); x++) {
+      screen_set(x, y, PRIMARY_COLOUR);
+    }
+  }
+
+  // Draw banner
+  for (size_t y = startY; y < startY + banner; y++) {
+    u8 colour = 41;
+    size_t third_width = popup_width / 3;
+
+    for (size_t x = startX; x < startX + popup_width; x++) {
+      if (x >= startX + third_width * 1 && x < startX + third_width * 2) {
+        colour = 42;
+      } else if (x >= startX + third_width * 2) {
+        colour = 43;
+      }
+
+      screen_set(x, y, colour);
+    }
+
+    colour = 41;
+  }
+
+  size_t currentX = startX + xPadding;
+  size_t currentY = startY + yPadding + banner;
+
+  // Draw popup text
+  for (size_t i = 0; label[i] != '\0'; i++) {
+    if (label[i] == '\n') {
+      currentX = startX + xPadding;
+      currentY += line_height + 2;
+    } else {
+      font_char(label[i], currentX, currentY, 8);
+      currentX += 8;
+    }
+  }
+  
+  screen_swap();
+
+  volatile boolean is_running = true;
+  while (is_running) {
+    if (listener_func != NULL) {
+      listener_func(&is_running);
+    }
+  }
+}
+
 void render_menu() {
   for (size_t y = 0; y < SCREEN_HEIGHT; y++) {
     for (size_t x = 10; x < 25; x++) {
@@ -355,8 +416,7 @@ void render_menu() {
 
 void render_game() {
   draw_score();
-  draw_game_arena();
-  draw_game_arena_border();
+  // draw_game_arena();
 
   draw_paddle(&left_paddle, left_paddle.colour);
   draw_paddle(&right_paddle, right_paddle.colour);
