@@ -9,6 +9,9 @@ typedef struct {
   u8 player_one_score;
   u8 player_two_score;
   u8 game_mode;
+
+  boolean is_counting_down;
+  u8 countdown_seconds;
 } GameState;
 
 typedef struct {
