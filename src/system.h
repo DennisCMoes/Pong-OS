@@ -98,5 +98,11 @@ static inline size_t strlen(const char *str) {
   return length;
 }
 
+static inline i32 abs(i32 num) {
+  return (num < 0) ? -num : num;
+}
+
+u32 rand();
+void seed(u32 seed);
 
 #endif
