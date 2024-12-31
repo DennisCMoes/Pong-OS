@@ -1,10 +1,14 @@
-# Pong OS
+# Pong-OS: An OS Just to Play Pong
 
 A custom ring 0 bare metal OS.
+
+![Main menu screenshot](images/main_menu.png)
 
 ## About
 
 This project was brought into life because I always wanted to be able to say that I had made an operating system. And this would be the perfect oppertunity. The OS will only run my custom implementation of pong the game. Hence that it is called "Pong OS". Pong OS runs on i386 architecture and provides a lightweight microkernel with only the necessary functionalities to support the game.
+
+![Player-one game](images/game.png)
 
 ## Design Goals
 
