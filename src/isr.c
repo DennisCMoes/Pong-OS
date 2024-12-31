@@ -1,6 +1,8 @@
 #include "isr.h"
+#include "font.h"
 #include "idt.h"
 #include "io.h"
+#include "screen.h"
 
 // Number of ISRs (32 for exceptions, 16 for IRQs)
 #define NUM_ISRS 48
@@ -161,10 +163,16 @@ void isr_handler(struct Registers *regs) {
 
 // A default handler for CPU exceptions.
 static void exception_handler(struct Registers *regs) {
-  // Write the exception name to the serial port for debugging
+  const char *exception_msg = exceptions[regs->int_no];
+  
+  // Write the exception to the serial port for debugging
   write_serial_string("Exception: ");
   write_serial_string(exceptions[regs->int_no]);
   write_serial_string("\n");
+
+  // Draw the exception to the screen
+  screen_clear(4);
+  font_str(exception_msg, SCREEN_CENTER_X - (strlen(exception_msg) * 8) / 2, SCREEN_CENTER_Y - 4, 0);
 }
 
 // Initializes the iSRs and sets up the default handlers.
