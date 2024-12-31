@@ -18,7 +18,7 @@ BOOTLOADER=	bootloader.bin
 KERNEL=		kernel.bin
 ISO=		boot.iso
 
-all: clean
+all: clean qemu
 
 clean:
 	rm -f ./**/*.o
