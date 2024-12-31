@@ -1,5 +1,11 @@
 # Pong-OS: An OS Just to Play Pong
 
+## ⚠️ Archived Project Notice
+
+This project is no longer maintained. Feel free to explore or fork the code, but it is provided as-is.
+
+## Description
+
 A custom ring 0 bare metal OS.
 
 ![Main menu screenshot](images/main_menu.png)
