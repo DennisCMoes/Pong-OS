@@ -7,6 +7,9 @@
 #define SCREEN_HEIGHT 200
 #define SCREEN_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT)
 
+#define SCREEN_CENTER_X (SCREEN_WIDTH / 2)
+#define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2)
+
 extern u8 screen_buffers[2][SCREEN_SIZE];
 extern u8 screen_back;
 

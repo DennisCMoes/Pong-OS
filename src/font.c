@@ -134,7 +134,7 @@ static const u8 FONT[128][8] = {
 };
 
 void font_char_scaled(u8 character, size_t xCor, size_t yCor, u8 colour, u8 scale) {
-  if (character < 0 || character >= 128) return;
+  if (character >= 128) return;
 
   const u8 *glyph = FONT[(u8)character];
 
@@ -160,7 +160,7 @@ void font_str_scaled(const char *str, size_t xCor, size_t yCor, u8 colour, u8 sc
 }
 
 void font_char(u8 character, size_t xCor, size_t yCor, u8 colour) {
-  if (character < 0 || character >= 128) return;
+  if (character >= 128) return;
 
   const u8 *glyph = FONT[(u8)character];
 

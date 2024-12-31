@@ -17,7 +17,7 @@ static void keyboard_handler() {
   // Read scancode from the keyboard port
   u8 scancode = port_byte_in(0x60);
 
-  if (scancode < 0 || scancode >= 128) {
+  if (scancode >= 128) {
     return;
   }
 
@@ -36,7 +36,7 @@ char keyboard_get_key() {
     u8 key = keyboard_state.key_buffer[0];
 
     // Shift the buffer
-    for (size_t i = 0; i < keyboard_state.buffer_index - 1; i++) {
+    for (u8 i = 0; i < keyboard_state.buffer_index - 1; i++) {
       keyboard_state.key_buffer[i] = keyboard_state.key_buffer[i + 1];
     }
 

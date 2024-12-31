@@ -29,9 +29,6 @@
 #define GAME_MODE_ONE_PLAYER 1
 #define GAME_MODE_TWO_PLAYERS 2
 
-static u16 SCREEN_CENTER_X = SCREEN_WIDTH / 2;
-static u16 SCREEN_CENTER_Y = SCREEN_HEIGHT / 2;
-
 static u8 WINNING_SCORE = 5;
 
 GameState game_state;
@@ -111,8 +108,8 @@ void draw_paddle(Paddle *paddle, u8 colour) {
 }
 
 void draw_ball(Ball *ball) {
-  for (size_t y = ball->yCor; y < ball->yCor + ball->size; y++) {
-    for (size_t x = ball->xCor; x < ball->xCor + ball->size; x++) {
+  for (i16 y = ball->yCor; y < ball->yCor + ball->size; y++) {
+    for (i16 x = ball->xCor; x < ball->xCor + ball->size; x++) {
       screen_set(x, y, ball->colour);
     }
   }
@@ -128,8 +125,6 @@ void draw_score() {
 
 void draw_game_arena() {
   u8 colour = 20;
-  u16 yCor = 0;
-
   u16 top = 0, bottom = SCREEN_HEIGHT;
 
   while (top < SCREEN_CENTER_Y + 1 && bottom > SCREEN_CENTER_Y - 1) {
@@ -571,7 +566,7 @@ int _main() {
     init();
 
     game_init();
-
+    
     u32 last_frame = 0, last = 0;
 
     while (true) {
